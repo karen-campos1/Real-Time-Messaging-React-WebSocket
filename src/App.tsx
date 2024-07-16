@@ -1,34 +1,67 @@
-import React, { useState } from 'react';
-import Chat from './components/Chat';
-import './App.css';
+import { useState } from "react";
+import { Button, Container, Form } from "react-bootstrap";
+import { io } from "socket.io-client";
+import MessageInput from "./components/MessageInput";
+import ChatBody from "./components/ChatBody";
+import "./App.css";  // Import custom CSS
 
-const App: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
+const socket = io("http://127.0.0.1:5000", { autoConnect: false });
 
-  const handleLogin = () => {
+function App() {
+  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [username, setUsername] = useState<string>("");
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  const handleConnect = () => {
+    socket.connect();
+    setIsConnected(true);
+  };
+
+  const handleDisconnect = () => {
+    socket.disconnect();
+    setIsConnected(false);
+  };
+
+  const handleLogin = (event: FormEvent) => {
+    event.preventDefault();
     if (username.trim()) {
-      setLoggedIn(true);
+      setIsLoggedIn(true);
+      handleConnect();
     }
   };
 
   return (
-    <div className="App">
-      {!loggedIn ? (
-        <div className="login">
-          <h2>Login</h2>
-          <input
-            type="text"
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <button onClick={handleLogin}>Login</button>
-        </div>
+    <Container className="app-container">
+      {isLoggedIn ? (
+        <>
+          <p className="status">
+            CONNECTION STATUS:{" "}
+            {isConnected ? "Connected to Flask Server" : "Disconnected from Flask Server"}
+          </p>
+          {isConnected ? (
+            <>
+              <ChatBody socket={socket} username={username} />
+              <MessageInput socket={socket} username={username} />
+              <Button variant="danger" onClick={handleDisconnect}>Disconnect</Button>
+            </>
+          ) : (
+            <Button onClick={handleConnect}>Connect</Button>
+          )}
+        </>
       ) : (
-        <Chat username={username} />
+        <Form onSubmit={handleLogin} className="login-form">
+          <Form.Group>
+            <Form.Label>Enter Username:</Form.Label>
+            <Form.Control
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </Form.Group>
+          <Button type="submit">Login</Button>
+        </Form>
       )}
-    </div>
+    </Container>
   );
 }
 

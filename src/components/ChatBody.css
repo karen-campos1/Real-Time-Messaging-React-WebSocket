@@ -1,0 +1,23 @@
+.chat-body {
+    height: 400px;
+    overflow-y: scroll;
+    margin-bottom: 20px;
+    background-color: #f7f7f7;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  .message-card {
+    margin-bottom: 10px;
+  }
+  
+  .sent {
+    background-color: #e6f7ff;
+    text-align: right;
+  }
+  
+  .received {
+    background-color: #fff;
+  }
+  
